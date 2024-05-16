@@ -1,0 +1,26 @@
+import string
+class MetinIslemleri:
+
+    def noktalama_isaretleri_kaldir(metin):
+        cevirici = str.maketrans('', '', string.punctuation)
+        yeni_metin = metin.translate(cevirici)
+        return yeni_metin
+
+    def kelimelere_ayristir(metin):
+        return metin.split()
+
+    def dosya_oku(dosya_adi):
+        with open(dosya_adi, "r") as dosya:
+            icerik = dosya.read()
+        return icerik
+
+dosya_adi = 'ornek.txt'
+
+metin = MetinIslemleri.dosya_oku(dosya_adi)
+
+temiz_metin = MetinIslemleri.noktalama_isaretleri_kaldir(metin)
+kelimeler = MetinIslemleri.kelimelere_ayristir(temiz_metin)
+
+print("Orijinal Metin:", metin)
+print("Temiz Metin:", temiz_metin)
+print("Kelimeler:", kelimeler)
