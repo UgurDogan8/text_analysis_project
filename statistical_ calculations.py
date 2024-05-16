@@ -34,6 +34,6 @@ def istatistik_hesapla(dosya_yolu):
         'en_az_gecen_kelimeler': en_az_gecen_kelimeler
     }
 
-dosya_yolu = 'deneme.txt'  # Analiz edilecek metin belgesinin yolu
+dosya_yolu = 'metin_adı.txt'  # Analiz edilecek metin belgesinin yolu
 istatistikler = istatistik_hesapla(dosya_yolu)
 print(istatistikler)
