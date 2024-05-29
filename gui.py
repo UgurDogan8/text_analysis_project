@@ -1,5 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QTextEdit, QLineEdit, QLabel, QFileDialog, QMessageBox
+import re
+from collections import Counter
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -61,9 +63,35 @@ class MainWindow(QMainWindow):
 
     def analyzeText(self):
         text = self.textEdit.toPlainText()
-        # Basit analiz işlemi: kelime sayısını hesapla
-        wordCount = len(text.split())
-        self.resultsEdit.setText(f'Kelime Sayısı: {wordCount}')
+        
+        # Harf sayısı
+        harf_sayisi = len(re.findall(r'\w', text))
+        
+        # Kelime sayısı
+        kelime_sayisi = len(re.findall(r'\b\w+\b', text))
+        
+        # Etkisiz kelime sayısı (varsayılan bir etkisiz kelime listesi kullanıldı)
+        etkisiz_kelimeler = set([
+            'bir', 've', 'ama', 'veya', 'gibi', 'şu', 'bu', 'o', 'şöyle', 'böyle'
+        ])
+        metin_kelimeler = re.findall(r'\b\w+\b', text)
+        etkisiz_kelime_sayisi = sum(1 for kelime in metin_kelimeler if kelime.lower() in etkisiz_kelimeler)
+        
+        # Kelime frekansları
+        kelime_frekanslari = Counter(metin_kelimeler)
+        en_fazla_gecen_kelimeler = kelime_frekanslari.most_common(5)
+        en_az_gecen_kelimeler = kelime_frekanslari.most_common()[:-6:-1]
+        
+        # Sonuçları birleştir ve göster
+        results = (
+            f'Harf Sayısı: {harf_sayisi}\n'
+            f'Kelime Sayısı: {kelime_sayisi}\n'
+            f'Etkisiz Kelime Sayısı: {etkisiz_kelime_sayisi}\n'
+            f'En Fazla Geçen 5 Kelime: {en_fazla_gecen_kelimeler}\n'
+            f'En Az Geçen 5 Kelime: {en_az_gecen_kelimeler}'
+        )
+        
+        self.resultsEdit.setText(results)
 
     def searchText(self):
         text = self.textEdit.toPlainText()
