@@ -26,6 +26,7 @@ def istatistik_hesapla(dosya_yolu):
     en_fazla_gecen_kelimeler = kelime_frekansları.most_common(5)
     en_az_gecen_kelimeler = kelime_frekansları.most_common()[:-6:-1]
 
+   
     return {
         'harf_sayısı': harf_sayısı,
         'kelime_sayısı': kelime_sayısı,
