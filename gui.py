@@ -20,15 +20,28 @@ class MainWindow(QMainWindow):
         self.textEdit = QTextEdit(self)
         layout.addWidget(self.textEdit)
 
-        # Metin yükleme düğmesi
-        loadButton = QPushButton('Metin Yükle', self)
-        loadButton.clicked.connect(self.loadText)
-        layout.addWidget(loadButton)
+        # İkinci metin yükleme ve görüntüleme alanı
+        self.textEdit2 = QTextEdit(self)
+        layout.addWidget(self.textEdit2)
+
+        # Metin yükleme düğmeleri
+        loadButton1 = QPushButton('Metin 1 Yükle', self)
+        loadButton1.clicked.connect(self.loadText)
+        layout.addWidget(loadButton1)
+
+        loadButton2 = QPushButton('Metin 2 Yükle', self)
+        loadButton2.clicked.connect(self.loadText2)
+        layout.addWidget(loadButton2)
 
         # Analiz yapma düğmesi
         analyzeButton = QPushButton('Analiz Yap', self)
         analyzeButton.clicked.connect(self.analyzeText)
         layout.addWidget(analyzeButton)
+
+        # Jaccard benzerlik düğmesi
+        jaccardButton = QPushButton('Jaccard Benzerlik', self)
+        jaccardButton.clicked.connect(self.calculateJaccardSimilarity)
+        layout.addWidget(jaccardButton)
 
         # Arama bölümü
         self.searchBox = QLineEdit(self)
@@ -60,6 +73,16 @@ class MainWindow(QMainWindow):
                 with open(fileName, 'r', encoding='utf-8') as file:
                     combinedText += file.read() + "\n\n"
             self.textEdit.setText(combinedText)
+
+    def loadText2(self):
+        options = QFileDialog.Options()
+        files, _ = QFileDialog.getOpenFileNames(self, "Metin Dosyalarını Aç", "", "Text Files (*.txt);;All Files (*)", options=options)
+        if files:
+            combinedText = ""
+            for fileName in files:
+                with open(fileName, 'r', encoding='utf-8') as file:
+                    combinedText += file.read() + "\n\n"
+            self.textEdit2.setText(combinedText)
 
     def analyzeText(self):
         text = self.textEdit.toPlainText()
@@ -100,6 +123,27 @@ class MainWindow(QMainWindow):
             self.resultsEdit.setText(f'"{searchTerm}" metin içinde bulundu.')
         else:
             self.resultsEdit.setText(f'"{searchTerm}" metin içinde bulunamadı.')
+
+    def calculateJaccardSimilarity(self):
+        metin1 = self.textEdit.toPlainText()
+        metin2 = self.textEdit2.toPlainText()
+
+        if not metin1 or not metin2:
+            QMessageBox.warning(self, "Hata", "İki metni de girmelisiniz.")
+            return
+
+        benzerlik = jaccard_benzerlik(metin1, metin2)
+        self.resultsEdit.setText(f'Jaccard Benzerlik: {benzerlik:.2f}')
+
+def jaccard_benzerlik(metin1, metin2):
+    kelimeler1 = set(metin1.split())
+    kelimeler2 = set(metin2.split())
+
+    ortak_kelimeler = kelimeler1.intersection(kelimeler2)
+    tum_kelimeler = kelimeler1.union(kelimeler2)
+
+    benzerlik = len(ortak_kelimeler) / len(tum_kelimeler)
+    return benzerlik
 
 def main():
     app = QApplication(sys.argv)
