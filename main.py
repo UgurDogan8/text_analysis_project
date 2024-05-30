@@ -1,12 +1,13 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QTextEdit, QLineEdit, QLabel, QFileDialog, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QTextEdit, QLineEdit, QLabel, QFileDialog, QMessageBox, QInputDialog
 import re
 from collections import Counter
+import sqlite3
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-
+        create_database()
         self.initUI()
 
     def initUI(self):
@@ -32,6 +33,23 @@ class MainWindow(QMainWindow):
         loadButton2 = QPushButton('Metin 2 Yükle', self)
         loadButton2.clicked.connect(self.loadText2)
         layout.addWidget(loadButton2)
+
+        # Veritabanı işlevleri düğmeleri
+        saveToDBButton = QPushButton('Veritabanına Kaydet', self)
+        saveToDBButton.clicked.connect(self.saveTextToDB)
+        layout.addWidget(saveToDBButton)
+
+        updateInDBButton = QPushButton('Veritabanında Güncelle', self)
+        updateInDBButton.clicked.connect(self.updateTextInDB)
+        layout.addWidget(updateInDBButton)
+
+        deleteFromDBButton = QPushButton('Veritabanından Sil', self)
+        deleteFromDBButton.clicked.connect(self.deleteTextFromDB)
+        layout.addWidget(deleteFromDBButton)
+
+        loadFromDBButton = QPushButton('Veritabanından Metinleri Yükle', self)
+        loadFromDBButton.clicked.connect(self.loadTextsFromDB)
+        layout.addWidget(loadFromDBButton)
 
         # Analiz yapma düğmesi
         analyzeButton = QPushButton('Analiz Yap', self)
@@ -83,6 +101,39 @@ class MainWindow(QMainWindow):
                 with open(fileName, 'r', encoding='utf-8') as file:
                     combinedText += file.read() + "\n\n"
             self.textEdit2.setText(combinedText)
+
+    def saveTextToDB(self):
+        name, ok = QInputDialog.getText(self, 'Metin İsmi', 'Metin için bir isim girin:')
+        if ok:
+            existing_text = get_text_by_name(name)
+            if existing_text:
+                QMessageBox.warning(self, "Hata", "Aynı isimde bir metin zaten var.")
+            else:
+                content = self.textEdit.toPlainText()
+                add_text_to_db(name, content)
+                QMessageBox.information(self, "Başarılı", "Metin veritabanına kaydedildi.")
+
+    def updateTextInDB(self):
+        text_id, ok = QInputDialog.getInt(self, 'Metin ID', 'Güncellenecek metnin ID numarasını girin:')
+        if ok:
+            name, ok = QInputDialog.getText(self, 'Yeni Metin İsmi', 'Metin için yeni bir isim girin:')
+            if ok:
+                content = self.textEdit.toPlainText()
+                update_text_in_db(text_id, name, content)
+                QMessageBox.information(self, "Başarılı", "Metin güncellendi.")
+
+    def deleteTextFromDB(self):
+        text_id, ok = QInputDialog.getInt(self, 'Metin ID', 'Silinecek metnin ID numarasını girin:')
+        if ok:
+            delete_text_from_db(text_id)
+            QMessageBox.information(self, "Başarılı", "Metin silindi.")
+
+    def loadTextsFromDB(self):
+        texts = get_all_texts()
+        combinedText = ""
+        for text in texts:
+            combinedText += f'ID: {text[0]}, Name: {text[1]}\n{text[2]}\n\n'
+        self.textEdit.setText(combinedText)
 
     def analyzeText(self):
         text = self.textEdit.toPlainText()
@@ -144,6 +195,57 @@ def jaccard_benzerlik(metin1, metin2):
 
     benzerlik = len(ortak_kelimeler) / len(tum_kelimeler)
     return benzerlik
+
+def create_database():
+    conn = sqlite3.connect('texts.db')
+    c = conn.cursor()
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS texts (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL,
+            content TEXT NOT NULL
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+def add_text_to_db(name, content):
+    conn = sqlite3.connect('texts.db')
+    c = conn.cursor()
+    c.execute('INSERT INTO texts (name, content) VALUES (?, ?)', (name, content))
+    conn.commit()
+    conn.close()
+
+def update_text_in_db(text_id, name, content):
+    conn = sqlite3.connect('texts.db')
+    c = conn.cursor()
+    c.execute('UPDATE texts SET name = ?, content = ? WHERE id = ?', (name, content, text_id))
+    conn.commit()
+    conn.close()
+
+def delete_text_from_db(text_id):
+    conn = sqlite3.connect('texts.db')
+    c = conn.cursor()
+    c.execute('DELETE FROM texts WHERE id = ?', (text_id,))
+    conn.commit()
+    conn.close()
+
+def get_all_texts():
+    conn = sqlite3.connect('texts.db')
+    c = conn.cursor()
+    c.execute('SELECT * FROM texts')
+    rows = c.fetchall()
+    conn.close()
+    return rows
+
+def get_text_by_name(name):
+    conn = sqlite3.connect('texts.db')
+    c = conn.cursor()
+    c.execute('SELECT * FROM texts WHERE name = ?', (name,))
+    text = c.fetchone()
+    conn.close()
+    return text
+
 
 def main():
     app = QApplication(sys.argv)
