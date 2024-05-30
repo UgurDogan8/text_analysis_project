@@ -136,36 +136,51 @@ class MainWindow(QMainWindow):
         self.textEdit.setText(combinedText)
 
     def analyzeText(self):
-        text = self.textEdit.toPlainText()
+        text1 = self.textEdit.toPlainText()
+        text2 = self.textEdit2.toPlainText()
         
-        # Harf sayısı
-        harf_sayisi = len(re.findall(r'\w', text))
-        
-        # Kelime sayısı
-        kelime_sayisi = len(re.findall(r'\b\w+\b', text))
-        
-        # Etkisiz kelime sayısı (varsayılan bir etkisiz kelime listesi kullanıldı)
-        etkisiz_kelimeler = set([
+        # Metin 1 için analiz
+        harf_sayisi1 = len(re.findall(r'\w', text1))
+        kelime_sayisi1 = len(re.findall(r'\b\w+\b', text1))
+        etkisiz_kelimeler1 = set([
             'bir', 've', 'ama', 'veya', 'gibi', 'şu', 'bu', 'o', 'şöyle', 'böyle'
         ])
-        metin_kelimeler = re.findall(r'\b\w+\b', text)
-        etkisiz_kelime_sayisi = sum(1 for kelime in metin_kelimeler if kelime.lower() in etkisiz_kelimeler)
+        metin_kelimeler1 = re.findall(r'\b\w+\b', text1)
+        etkisiz_kelime_sayisi1 = sum(1 for kelime in metin_kelimeler1 if kelime.lower() in etkisiz_kelimeler1)
+        kelime_frekanslari1 = Counter(metin_kelimeler1)
+        en_fazla_gecen_kelimeler1 = kelime_frekanslari1.most_common(5)
+        en_az_gecen_kelimeler1 = kelime_frekanslari1.most_common()[:-6:-1]
         
-        # Kelime frekansları
-        kelime_frekanslari = Counter(metin_kelimeler)
-        en_fazla_gecen_kelimeler = kelime_frekanslari.most_common(5)
-        en_az_gecen_kelimeler = kelime_frekanslari.most_common()[:-6:-1]
+        # Metin 2 için analiz
+        harf_sayisi2 = len(re.findall(r'\w', text2))
+        kelime_sayisi2 = len(re.findall(r'\b\w+\b', text2))
+        etkisiz_kelimeler2 = set([
+            'bir', 've', 'ama', 'veya', 'gibi', 'şu', 'bu', 'o', 'şöyle', 'böyle'
+        ])
+        metin_kelimeler2 = re.findall(r'\b\w+\b', text2)
+        etkisiz_kelime_sayisi2 = sum(1 for kelime in metin_kelimeler2 if kelime.lower() in etkisiz_kelimeler2)
+        kelime_frekanslari2 = Counter(metin_kelimeler2)
+        en_fazla_gecen_kelimeler2 = kelime_frekanslari2.most_common(5)
+        en_az_gecen_kelimeler2 = kelime_frekanslari2.most_common()[:-6:-1]
         
         # Sonuçları birleştir ve göster
         results = (
-            f'Harf Sayısı: {harf_sayisi}\n'
-            f'Kelime Sayısı: {kelime_sayisi}\n'
-            f'Etkisiz Kelime Sayısı: {etkisiz_kelime_sayisi}\n'
-            f'En Fazla Geçen 5 Kelime: {en_fazla_gecen_kelimeler}\n'
-            f'En Az Geçen 5 Kelime: {en_az_gecen_kelimeler}'
+            f'Metin 1 Analizi:\n'
+            f'Harf Sayısı: {harf_sayisi1}\n'
+            f'Kelime Sayısı: {kelime_sayisi1}\n'
+            f'Etkisiz Kelime Sayısı: {etkisiz_kelime_sayisi1}\n'
+            f'En Fazla Geçen 5 Kelime: {en_fazla_gecen_kelimeler1}\n'
+            f'En Az Geçen 5 Kelime: {en_az_gecen_kelimeler1}\n\n'
+            f'Metin 2 Analizi:\n'
+            f'Harf Sayısı: {harf_sayisi2}\n'
+            f'Kelime Sayısı: {kelime_sayisi2}\n'
+            f'Etkisiz Kelime Sayısı: {etkisiz_kelime_sayisi2}\n'
+            f'En Fazla Geçen 5 Kelime: {en_fazla_gecen_kelimeler2}\n'
+            f'En Az Geçen 5 Kelime: {en_az_gecen_kelimeler2}'
         )
         
         self.resultsEdit.setText(results)
+
 
     def searchText(self):
         text = self.textEdit.toPlainText()
