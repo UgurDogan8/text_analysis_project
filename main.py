@@ -163,7 +163,7 @@ class MainWindow(QMainWindow):
         en_fazla_gecen_kelimeler2 = kelime_frekanslari2.most_common(5)
         en_az_gecen_kelimeler2 = kelime_frekanslari2.most_common()[:-6:-1]
         
-        # Sonuçları birleştir ve göster
+        # Sonuçların birleşmesi ve gösterilmesi
         results = (
             f'Metin 1 Analizi:\n'
             f'Harf Sayısı: {harf_sayisi1}\n'
